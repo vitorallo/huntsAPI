@@ -1,6 +1,16 @@
 # Microsoft Sentinel Integration API
 
-This Node.js application provides an API to interact with Microsoft Sentinel and Azure Active Directory. It allows you to:
+This Node.js application provides an API to interact with Microsoft Sentinel and Azure Active Directory. It allows you to interact more easily with the Sentinel APIs and the MicrosoftSecurityInsights API.
+
+A great attempt was made by Wortell 2 years ago with a PowerShell script AZSentinel that was helping to push KQL queries to Sentinel. 
+https://github.com/wortell/AZSentinel
+
+However, at the time and still not mature Sentinel APIs, the possibilities are limited, just to push queries to the StoredQuery repository in the MicrosoftSecurityInsights API.
+
+Sentinel is now offering in "preview" the possibility to group hunts and run a collection of queries in a single hunt. In order to deal with these new features, you need a mix of the MicrosoftSecurityInsights API and the Sentinel APIs (which are still in preview and ligthly documented).
+https://learn.microsoft.com/en-us/rest/api/securityinsights/api-versions?view=rest-securityinsights-2025-03-01
+
+Through this application, you can manage the hunts and queries in Sentinel and the MicrosoftSecurityInsights API in one place, and you can also reverse the logic on how the APIs are working to correlate the queries with the hunts. Well, you don't need to get an headache. Why this is useful? I let you draw your own conclusions, but the sample CLI app should give you an idea on the potential to add an abstraction layer on top of the Sentinel APIs with an Enterprise App.
 
 ---
 
