@@ -1,0 +1,478 @@
+openapi: 3.0.0
+info:
+  title: Microsoft Sentinel Integration API
+  version: 1.0.0
+  description: API to interact with Microsoft Sentinel (hunts, queries) and Azure AD (app registration).
+servers:
+  - url: http://localhost:3001/api
+    description: Local development server
+
+paths:
+  /register-app:
+    post:
+      summary: Register Application
+      description: Registers a new application in Azure AD and assigns Sentinel API permissions. Requires app creation privileges for the caller.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                appName:
+                  type: string
+                  description: Display name for the new application. Defaults to 'Sentinel TH Integration App'.
+                redirectUris:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  description: List of redirect URIs for the web platform.
+      responses:
+        '201':
+          description: Application registered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  appId:
+                    type: string
+                    description: Client ID of the newly registered application.
+                  objectId:
+                    type: string
+                    description: Object ID of the newly registered application.
+                  displayName:
+                    type: string
+                    description: Display name of the newly registered application.
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+        '403':
+          $ref: '#/components/responses/ErrorResponse' # Example for insufficient privileges
+
+  /app-info:
+    get:
+      summary: Get Application Info
+      description: Retrieves details about the application specified by AZURE_CLIENT_ID in the .env file.
+      responses:
+        '200':
+          description: Application details retrieved successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationInfo'
+        '404':
+          description: Application not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /hunting-queries:
+    get:
+      summary: List Hunting Queries
+      description: Lists all saved searches (including hunting queries) in the Sentinel workspace.
+      responses:
+        '200':
+          description: List of saved searches.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SavedSearch'
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create Hunting Query (JSON)
+      description: Creates a new saved search (hunting query) from JSON input.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryInput'
+      responses:
+        '201':
+          description: Query created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearch'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For invalid input
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /hunting-queries/upload:
+    post:
+      summary: Create Hunting Query (File Upload)
+      description: Creates a new saved search (hunting query) from an uploaded .kql file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The .kql file to upload.
+      responses:
+        '201':
+          description: Query created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SavedSearch'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For no file, wrong type, or parsing error
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /hunting-queries/run:
+    post:
+      summary: Run Hunting Query
+      description: Executes a KQL query against the Log Analytics workspace.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - query
+              properties:
+                query:
+                  type: string
+                  description: The KQL query to execute.
+                timespan:
+                  type: string
+                  description: Time range (e.g., P1D, P7D). Defaults to P1D.
+                  default: P1D
+      responses:
+        '200':
+          description: Query results.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResults'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For missing query or invalid KQL
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /hunts:
+    get:
+      summary: List Hunts
+      description: Lists all hunts in the Sentinel workspace.
+      responses:
+        '200':
+          description: List of hunts.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  value:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Hunt'
+                  nextLink:
+                    type: string
+                    format: uri
+                    description: Link to the next page of results, if applicable.
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+    post:
+      summary: Create Hunt
+      description: Creates a new hunt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Display name for the hunt.
+                description:
+                  type: string
+                  description: Description for the hunt.
+      responses:
+        '201':
+          description: Hunt created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Hunt'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For invalid input
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /link-query:
+    post:
+      summary: Link Query to Hunt
+      description: Creates a relation linking an existing saved search (query) to an existing hunt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - huntId
+                - queryResourceId
+              properties:
+                huntId:
+                  type: string
+                  format: uuid # Or just string if not strictly UUID
+                  description: The GUID (name property) of the target hunt.
+                queryResourceId:
+                  type: string
+                  description: The full Azure Resource ID of the saved search (query).
+                  example: /subscriptions/sub-id/resourceGroups/rg-name/providers/Microsoft.OperationalInsights/workspaces/ws-name/savedSearches/query-guid
+      responses:
+        '201':
+          description: Link created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relation'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For invalid input/IDs
+        '500':
+          $ref: '#/components/responses/ErrorResponse'
+
+  /bulk-create-hunt:
+    post:
+      summary: Bulk Create Hunt & Query
+      description: Creates a query, creates a hunt, and links them together.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/QueryInput'
+                - type: object
+                  required:
+                    - huntName
+                  properties:
+                    huntName:
+                      type: string
+                      description: Display name for the new hunt.
+                    huntDescription:
+                      type: string
+                      description: Description for the new hunt.
+      responses:
+        '201':
+          description: Bulk operation successful, returns the created relation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relation'
+        '400':
+          $ref: '#/components/responses/ErrorResponse' # For missing required fields
+        '500':
+          $ref: '#/components/responses/ErrorResponse' # If any step fails
+
+  /purge:
+    delete:
+      summary: Purge Resources
+      description: Deletes hunts, relations, and queries created by this integration (identified by label/tag). Use with caution!
+      responses:
+        '200':
+          description: Purge completed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurgeResult'
+        '207':
+          description: Purge completed with partial success or errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PurgeResult'
+        '500':
+          $ref: '#/components/responses/ErrorResponse' # For catastrophic failure
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Description of the error.
+    ApplicationInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object ID of the application.
+        appId:
+          type: string
+          description: Client ID of the application.
+        displayName:
+          type: string
+        # Add other relevant properties from the Graph API Application object if needed
+    SavedSearchProperties:
+      type: object
+      properties:
+        category:
+          type: string
+        displayName:
+          type: string
+        query:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              value:
+                type: string
+        # Add other relevant properties
+    SavedSearch:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        etag:
+          type: string
+        properties:
+          $ref: '#/components/schemas/SavedSearchProperties'
+    QueryInput:
+      type: object
+      required:
+        - name
+        - query
+      properties:
+        name:
+          type: string
+          description: Display name for the query.
+        description:
+          type: string
+          description: Description for the query.
+        query:
+          type: string
+          description: The KQL query text.
+        tactics:
+          type: string # Or array of strings depending on how it's processed
+          description: MITRE ATT&CK tactics (comma-separated or single string).
+        techniques:
+          type: string # Or array of strings
+          description: MITRE ATT&CK techniques (comma-separated or single string).
+        extid:
+          type: string
+          description: Optional external identifier.
+    QueryResults:
+      type: object
+      properties:
+        tables:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+              columns:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    type:
+                      type: string
+              rows:
+                type: array
+                items:
+                  type: array # Array of values corresponding to columns
+    HuntProperties:
+      type: object
+      properties:
+        displayName:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        # Add other relevant properties
+    Hunt:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string # This is the Hunt ID (GUID)
+        type:
+          type: string
+        properties:
+          $ref: '#/components/schemas/HuntProperties'
+    RelationProperties:
+      type: object
+      properties:
+        relatedResourceId:
+          type: string
+        relatedResourceType:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        # Add other relevant properties
+    Relation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string # This is the Relation ID (GUID)
+        type:
+          type: string
+        properties:
+          $ref: '#/components/schemas/RelationProperties'
+    PurgeResultDetail:
+      type: object
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+    PurgeResult:
+      type: object
+      properties:
+        queryCleanup:
+          $ref: '#/components/schemas/PurgeResultDetail'
+        huntCleanup:
+          $ref: '#/components/schemas/PurgeResultDetail'
+
+  responses:
+    ErrorResponse:
+      description: Generic error response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'

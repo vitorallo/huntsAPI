@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "24de1b77-927b-42a5-84d9-51ff2dbdba75",
+		"name": "First test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "4350740"
+	},
+	"item": [
+		{
+			"name": "app-info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:3001/api/app-info"
+			},
+			"response": []
+		},
+		{
+			"name": "list hunting-queries",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:3001/api/hunting-queries"
+			},
+			"response": []
+		},
+		{
+			"name": "register-app",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3000/api/register-app"
+			},
+			"response": []
+		},
+		{
+			"name": "add hunting-queries",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Joey Query Bla bla\",\n    \"description\": \"this is a demo with joey\",\n    \"query\": \"SecurityEvent|where EventID == 4624\",\n    \"tactics\": [\"InitialAccess\"],\n    \"techniques\": [\"T1078\",\"T1176\"]\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3000/api/hunting-queries"
+			},
+			"response": []
+		},
+		{
+			"name": "bulk-create-hunt",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"query\": \"SecurityEvent|where EventID == 4624\",\n    \"displayName\": \"Search for pussy2\",\n    \"description\": \"Perform a search over actors\",\n    \"huntName\": \"ROCCO Actor2\",\n    \"huntDescription\": \"The APT by Rocco\",\n    \"tactics\": [\"InitialAccess\"],\n    \"techniques\": [\"T1078\"]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3000/api/bulk-create-hunt"
+			},
+			"response": []
+		},
+		{
+			"name": "link-query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"huntId\": \"671fe04c-6ebe-4a6c-904a-06dac623bf90\",\n    \"queryResourceId\": \"/subscriptions/72c73835-2277-4ddf-9ee8-944fc51a2609/resourceGroups/test/providers/Microsoft.OperationalInsights/workspaces/EMAWorkspace/savedSearches/269455c5-143e-45c6-b82c-b31a8bea8c66\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3000/api/link-query"
+			},
+			"response": []
+		},
+		{
+			"name": "create-hunt",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Testing Hunt\",\n    \"description\": \"this is an hunt created via sentinel th integration\"\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "http://localhost:3001/api/hunts"
+			},
+			"response": []
+		},
+		{
+			"name": "purge-sentinel",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "http://localhost:3001/api/purge"
+			},
+			"response": []
+		},
+		{
+			"name": "list hunts",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:3001/api/hunts"
+			},
+			"response": []
+		}
+	]
+}
