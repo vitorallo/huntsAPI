@@ -4,8 +4,9 @@ This Node.js application provides an API to interact with Microsoft Sentinel and
 
 A great attempt was made by Wortell 2 years ago with a PowerShell script AZSentinel that was helping to push KQL queries to Sentinel. 
 https://github.com/wortell/AZSentinel
+(you can call this a refreshed version of the work done by Wortell)
 
-However, at the time and still not mature Sentinel APIs, the possibilities are limited, just to push queries to the StoredQuery repository in the MicrosoftSecurityInsights API.
+However, at the time, with still not mature Sentinel APIs, the possibilities were limited - just to push queries to the StoredQuery repository in the MicrosoftSecurityInsights API.
 
 Sentinel is now offering in "preview" the possibility to group hunts and run a collection of queries in a single hunt. In order to deal with these new features, you need a mix of the MicrosoftSecurityInsights API and the Sentinel APIs (which are still in preview and ligthly documented).
 https://learn.microsoft.com/en-us/rest/api/securityinsights/api-versions?view=rest-securityinsights-2025-03-01
@@ -20,6 +21,13 @@ A sample Python CLI tool for managing hunts and queries locally is included in t
 
 See the detailed [Sample CLI README](sample/README.md) for setup instructions and usage examples.
 
+## Postman Collection and Swagger
+
+In the repository, you can find a Postman collection and a Swagger file that can be used to interact with the API.
+These are great tools to better understand the APIs and how to interact with them.
+Yes, I know, openAPI - I will keep calling it Swagger forever :)
+
+## How to start
 ---
 
 *   Register the application itself within Azure AD.
