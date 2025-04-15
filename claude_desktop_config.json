@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "sentinel": {
+      "command": "node",
+      "args": [
+        "/Users/vito/src/huntsAPI/sentinel-mcp-server.js"
+      ]
+    }
+  }
+}
