@@ -1,5 +1,4 @@
 import requests
-import json
 
 class HuntsAPIClient:
     def __init__(self, base_url="http://localhost:3001"):
