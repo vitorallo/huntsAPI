@@ -201,8 +201,27 @@ app.post('/api/hunting-queries/run', async (req, res) => {
   try {
     const { query, timespan } = req.body;
     
+    // Enhanced query validation
     if (!query) {
       return res.status(400).json({ error: 'Query is required' });
+    }
+    
+    if (typeof query !== 'string' || query.trim() === '') {
+      return res.status(400).json({ error: 'Query must be a non-empty string' });
+    }
+    
+    // Basic KQL syntax validation
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery.match(/^[a-zA-Z_][a-zA-Z0-9_]*/) && !trimmedQuery.match(/^[a-zA-Z_][a-zA-Z0-9_]*\s*\|/)) {
+      return res.status(400).json({ error: 'Query appears to have invalid KQL syntax. Must start with a table name or data source.' });
+    }
+    
+    // Validate timespan format if provided
+    if (timespan && typeof timespan === 'string') {
+      // Basic ISO 8601 duration validation (P[n]Y[n]M[n]DT[n]H[n]M[n]S or simple formats like P1D)
+      if (!timespan.match(/^P(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+S)?)?$/) && !timespan.match(/^P\d+[DWMY]$/)) {
+        return res.status(400).json({ error: 'Invalid timespan format. Use ISO 8601 duration format (e.g., P1D, PT1H, P7D)' });
+      }
     }
     
     const result = await runHuntingQuery(query, timespan);

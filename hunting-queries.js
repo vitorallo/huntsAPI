@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { createHuntingQuery, linkQuery, createHunt, cleanupHuntingQueries, cleanupHunts } = require('./sentinel-client');
+const { createHuntingQuery, linkQuery, createHunt, cleanupHuntingQueries, cleanupHunts, runHuntingQuery } = require('./sentinel-client');
 
 
 /**
@@ -148,6 +148,24 @@ const purgeSentinel = async () => {
 };
 
 /**
+ * Executes a KQL hunting query against the Sentinel workspace.
+ * @param {string} query - The KQL query to execute.
+ * @param {string} timespan - Optional timespan (default: 'P1D' for 1 day).
+ * @returns {Promise<object>} The query results from the Sentinel API.
+ */
+const runQuery = async (query, timespan = 'P1D') => {
+  try {
+    if (!query || typeof query !== 'string' || query.trim() === '') {
+      throw new Error('Query parameter is required and must be a non-empty string');
+    }
+    return await runHuntingQuery(query, timespan);
+  } catch (error) {
+    console.error('Error running query:', error);
+    throw error;
+  }
+};
+
+/**
  * Creates a Sentinel hunt and a corresponding query, then links them together.
  * @param {object} queryData - Object containing details for both the query and the hunt.
  *   Expected properties: query, displayName, description, huntName, huntDescription, tactics, techniques.
@@ -216,5 +234,6 @@ module.exports = {
   createQueryFromInput,
   createHuntWithQuery,
   purgeSentinel,
-  linkQueryToHunt
+  linkQueryToHunt,
+  runQuery
 };

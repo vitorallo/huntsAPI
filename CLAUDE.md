@@ -54,6 +54,7 @@ The project bridges multiple Azure APIs:
 - Microsoft Graph API (application management)
 - Azure Management API (Sentinel workspace operations) 
 - MicrosoftSecurityInsights API (hunting queries)
+- Log Analytics API (query execution)
 
 ### Resource Management
 All created resources are tagged with `CreatedBy: "huntsapi-integration"` for identification and bulk cleanup operations.
@@ -86,7 +87,12 @@ When using Claude Desktop with the MCP server:
 1. `create_hunt` - Create new Sentinel hunts
 2. `create_query_with_hunt` - Create queries and hunts together
 3. `delete_hunt` - Delete specific hunts
+4. `run_hunting_query` - Execute KQL queries against the Sentinel workspace
 
 ## File Processing
 
 Supports both JSON input and KQL file uploads. KQL files can include metadata in comments using `// DisplayName:`, `// Description:`, `// Tactics:`, `// Techniques:` format.
+
+## Query Execution
+
+The `runHuntingQuery` function (available via `hunting-queries.js`, REST API, and MCP server) executes KQL queries against the Sentinel workspace using the Log Analytics API. Supports configurable timespan parameters (ISO 8601 duration format like P1D, PT1H, P7D).

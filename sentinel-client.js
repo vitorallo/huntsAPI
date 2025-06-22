@@ -207,8 +207,8 @@ const linkQuery = async (queryData) => {
 };
 
 // Run a hunting query and get results
-// Use a specific API version for Log Analytics query API
-const LOG_ANALYTICS_API_VERSION = '2021-12-01-preview'; // Or a stable version like '2020-08-01' if preferred
+// Use a stable API version for Log Analytics query API for maximum regional compatibility
+const LOG_ANALYTICS_API_VERSION = '2017-10-01'; // Stable version that works across all Azure regions
 
 const runHuntingQuery = async (query, timespan = 'P1D') => {
   const token = await getSentinelToken();

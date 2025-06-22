@@ -124,6 +124,20 @@ const TOOLS = {
       },
       required: ['huntId']
     }
+  },
+  
+  // Tool 4: run_hunting_query
+  run_hunting_query: {
+    name: 'run_hunting_query',
+    description: 'Execute a KQL hunting query against the Sentinel workspace and get results',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'KQL query text to execute' },
+        timespan: { type: 'string', description: 'Query timespan (optional, default: P1D for 1 day)' }
+      },
+      required: ['query']
+    }
   }
 };
 
@@ -273,6 +287,22 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
             {
               type: 'text',
               text: `Hunt deleted successfully. Any linked queries should be automatically unlinked.`
+            }
+          ]
+        };
+        
+      case 'run_hunting_query':
+        // Use the /api/hunting-queries/run endpoint to execute the query
+        const queryResult = await sentinelApiRequest('/hunting-queries/run', 'POST', {
+          query: args.query,
+          timespan: args.timespan || 'P1D'
+        });
+        
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Query executed successfully:\n${JSON.stringify(queryResult, null, 2)}`
             }
           ]
         };

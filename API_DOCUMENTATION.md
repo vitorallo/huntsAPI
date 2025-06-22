@@ -166,7 +166,7 @@ SUBSCRIPTION_ID=your_subscription_id
 #### 6. Run Hunting Query
 
 *   **Endpoint:** `POST /api/hunting-queries/run`
-*   **Description:** Executes a given KQL query against the configured Log Analytics workspace.
+*   **Description:** Executes a given KQL query against the configured Log Analytics workspace using the Azure Log Analytics API.
 *   **Request Body (`application/json`):**
     ```json
     {
@@ -174,8 +174,33 @@ SUBSCRIPTION_ID=your_subscription_id
       "timespan": "P7D"
     }
     ```
-    *   `query` (string, required): The KQL query to execute.
-    *   `timespan` (string, optional): The time range for the query (e.g., `P1D`, `P7D`, `PT1H`). Defaults to `P1D` (1 day).
+*   **Example Requests:**
+    ```json
+    // Basic query with default timespan (1 day)
+    {
+      "query": "Heartbeat | count"
+    }
+    
+    // Security events in last hour
+    {
+      "query": "SecurityEvent | where TimeGenerated > ago(1h) | take 10",
+      "timespan": "P1D"
+    }
+    
+    // Failed logins analysis
+    {
+      "query": "SigninLogs | where ResultType != 0 | summarize FailedLogins = count() by UserPrincipalName | order by FailedLogins desc",
+      "timespan": "PT6H"
+    }
+    
+    // Network connections summary
+    {
+      "query": "CommonSecurityLog | where DeviceVendor == 'Palo Alto Networks' | summarize count() by DestinationIP",
+      "timespan": "P7D"
+    }
+    ```
+    *   `query` (string, required): The KQL query to execute. Must be a non-empty string and should start with a valid table name or data source.
+    *   `timespan` (string, optional): The time range for the query in ISO 8601 duration format (e.g., `P1D`, `P7D`, `PT1H`, `P30D`). Defaults to `P1D` (1 day).
 *   **Success Response (200 OK):**
     *   Returns the results from the Log Analytics query API.
     ```json
@@ -190,7 +215,11 @@ SUBSCRIPTION_ID=your_subscription_id
     }
     ```
 *   **Error Responses:**
-    *   `400 Bad Request`: `{ "error": "Query is required" }`
+    *   `400 Bad Request`: 
+        - `{ "error": "Query is required" }`
+        - `{ "error": "Query must be a non-empty string" }`
+        - `{ "error": "Query appears to have invalid KQL syntax. Must start with a table name or data source." }`
+        - `{ "error": "Invalid timespan format. Use ISO 8601 duration format (e.g., P1D, PT1H, P7D)" }`
     *   `4xx/5xx`: `{ "error": "Error message description" }` (e.g., invalid KQL, Azure API error)
 
 ---
