@@ -89,13 +89,13 @@ const TOOLS = {
   // Tool 2: create_query_with_hunt
   create_query_with_hunt: {
     name: 'create_query_with_hunt',
-    description: 'Create a query and a hunt, then link them together',
+    description: 'Create a hunt with ONE only query associated, then link them together. Tactics and techniques must be specified as strings and separate them inside with commas',
     inputSchema: {
       type: 'object',
       properties: {
         queryName: { type: 'string', description: 'Display name for the query' },
         queryDescription: { type: 'string', description: 'Description of the query' },
-        queryText: { type: 'string', description: 'KQL query text' },
+        queryText: { type: 'string', description: 'KQL query text in one string' },
         huntName: { type: 'string', description: 'Display name for the hunt' },
         huntDescription: { type: 'string', description: 'Description of the hunt' },
         tactics: { 

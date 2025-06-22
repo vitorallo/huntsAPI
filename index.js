@@ -47,6 +47,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 // --- API Routes ---
 
 // Register a new application
+// this is obsolete, but kept for reference, better not to use it and register the app manually in Azure AD
 app.post('/api/register-app', async (req, res) => {
   const context = 'Registering application';
   try {

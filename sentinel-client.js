@@ -20,7 +20,7 @@ const getHuntingQueries = async () => {
         Authorization: `Bearer ${token.token}`
       }
     });
-    //if (response.data.length > 0) return response.data.value;
+    //  if (response.data.length > 0) return response.data.value;
     //  else return ['No hunting queries found'];
     return response.data.value;
 
@@ -112,10 +112,10 @@ const createHuntingQuery = async (queryData) => {
   // Add tactics and techniques as tags if provided
   if (queryData.tactics && queryData.tactics.length > 0) {
     // Clean up tactics string (remove spaces, fix common typo the way MS likes it)
-    const cleanedTactics = queryData.tactics.replace(/\s+/g, '').replace(/CommandandControl/g, "CommandAndControl");
+    //const cleanedTactics = queryData.tactics.replace(/\s+/g, '').replace(/CommandandControl/g, "CommandAndControl");
     apiQueryData.properties.tags.push({
       name: TACTICS_TAG_NAME,
-      value: cleanedTactics
+      value: queryData.tactics.replace(/\s+/g, '').replace(/CommandandControl/g, "CommandAndControl")
     });
   }
 
