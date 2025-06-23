@@ -47,7 +47,7 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 // --- API Routes ---
 
 // Register a new application
-// this is obsolete, but kept for reference, better not to use it and register the app manually in Azure AD
+// Note: This is obsolete, better to register the app manually in Azure AD
 app.post('/api/register-app', async (req, res) => {
   const context = 'Registering application';
   try {
@@ -95,7 +95,7 @@ app.get('/api/hunting-queries', async (req, res) => {
 // Get all hunts
 app.get('/api/hunts', async (req, res) => {
   try {
-    const hunts = await getHunts(); // Renamed variable for clarity
+    const hunts = await getHunts();
     res.json(hunts);
   } catch (error) {
     sendErrorResponse(res, error, 500, 'Getting hunts');
@@ -118,7 +118,6 @@ app.post('/api/hunts', async (req, res) => {
     const result = await createSentinelHunt(req.body);
     res.status(201).json(result);
   } catch (error) {
-    // Corrected context message
     sendErrorResponse(res, error, 500, 'Creating sentinel hunt');
   }
 });
@@ -139,7 +138,6 @@ app.post('/api/bulk-create-hunt', async (req, res) => {
     const result = await createHuntWithQuery(req.body);
     res.status(201).json(result);
   } catch (error) {
-    // Use error message from the thrown error in hunting-queries.js
     sendErrorResponse(res, error, 500, 'Bulk creating hunt and query');
   }
 });
@@ -147,20 +145,15 @@ app.post('/api/bulk-create-hunt', async (req, res) => {
 app.delete('/api/purge', async (req, res) => {
   const context = 'Purging Sentinel resources';
   try {
-    // Note: purgeSentinel was refactored to not take req.body
     const result = await purgeSentinel();
-    // Check if either cleanup operation reported an error internally
     if (result.queryCleanup?.error || result.huntCleanup?.error) {
         console.warn(`${context}: Purge completed with errors.`, result);
-        // Send a 207 Multi-Status response indicating partial success/failure
         res.status(207).json(result);
     } else {
         console.log(`${context}: Purge completed successfully.`);
-        res.status(200).json(result); // Use 200 OK for successful deletion
+        res.status(200).json(result);
     }
   } catch (error) {
-    // This catch block might not be strictly necessary anymore if
-    // purgeSentinel handles its internal errors, but keep for safety.
     sendErrorResponse(res, error, 500, context);
   }
 });

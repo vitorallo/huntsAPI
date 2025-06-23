@@ -46,7 +46,7 @@ const parseKqlFile = (filePath) => {
   }
 
   return {
-    name: metadata.name || path.basename(filePath, '.kql'), // Use filename if name metadata is missing
+    name: metadata.name || path.basename(filePath, '.kql'),
     description: metadata.description || '',
     tactics: metadata.tactics || [],
     techniques: metadata.techniques || [],
@@ -71,8 +71,8 @@ const createQueryFromFile = async (filePath) => {
 
 /**
  * Creates a Sentinel hunting query using data provided directly as an object.
- * @param {object} queryData - Object containing name, description, query, tactics, techniques.
- * @returns {Promise<object>} The result from the Sentinel API.
+ * @param {object} queryData Object containing name, description, query, tactics, techniques
+ * @returns {Promise<object>} The result from the Sentinel API
  */
 const createQueryFromInput = async (queryData) => {
   try {
@@ -85,8 +85,8 @@ const createQueryFromInput = async (queryData) => {
 
 /**
  * Creates a Sentinel hunt using data provided directly as an object.
- * @param {object} queryData - Object containing name, description.
- * @returns {Promise<object>} The result from the Sentinel API.
+ * @param {object} queryData Object containing name, description
+ * @returns {Promise<object>} The result from the Sentinel API
  */
 const createSentinelHunt = async (queryData) => {
   try {
@@ -99,8 +99,8 @@ const createSentinelHunt = async (queryData) => {
 
 /**
  * Links an existing Sentinel query to an existing Sentinel hunt.
- * @param {object} queryData - Object containing huntId and queryResourceId.
- * @returns {Promise<object>} The result from the Sentinel API.
+ * @param {object} queryData Object containing huntId and queryResourceId
+ * @returns {Promise<object>} The result from the Sentinel API
  */
 const linkQueryToHunt = async (queryData) => {
   try {
@@ -149,9 +149,9 @@ const purgeSentinel = async () => {
 
 /**
  * Executes a KQL hunting query against the Sentinel workspace.
- * @param {string} query - The KQL query to execute.
- * @param {string} timespan - Optional timespan (default: 'P1D' for 1 day).
- * @returns {Promise<object>} The query results from the Sentinel API.
+ * @param {string} query The KQL query to execute
+ * @param {string} timespan Optional timespan (default: 'P1D' for 1 day)
+ * @returns {Promise<object>} The query results from the Sentinel API
  */
 const runQuery = async (query, timespan = 'P1D') => {
   try {
@@ -185,18 +185,18 @@ const createHuntWithQuery = async (queryData) => {
 
   // Validate required fields
   if (!queryKQL || !displayName || !huntName) {
-      throw new Error("Missing required fields for bulk create: query, displayName, huntName");
+    throw new Error('Missing required fields for bulk create: query, displayName, huntName');
   }
 
   try {
     // 1. Create the query
     console.log(`Creating query: ${displayName}`);
     const query = await createHuntingQuery({
-        name: displayName,
-        description: description, // Use provided description or default empty string
-        query: queryKQL,
-        tactics: tactics,
-        techniques: techniques
+      name: displayName,
+      description: description,
+      query: queryKQL,
+      tactics: tactics,
+      techniques: techniques
     });
     console.log(`Query created: ${query.id}`);
 
@@ -204,25 +204,22 @@ const createHuntWithQuery = async (queryData) => {
     console.log(`Creating hunt: ${huntName}`);
     const hunt = await createHunt({
       name: huntName,
-      description: huntDescription || '', // Use provided description or default empty string
+      description: huntDescription || ''
     });
-    console.log(`Hunt created: ${hunt.name}`); // Hunt ID is in hunt.name
+    console.log(`Hunt created: ${hunt.name}`);
 
     // 3. Link query to hunt
     console.log(`Linking query ${query.id} to hunt ${hunt.name}`);
     const linkResult = await linkQuery({
-      huntId: hunt.name, // Use the hunt's name (which is its ID)
-      queryResourceId: query.id // Use the query's full resource ID
+      huntId: hunt.name,
+      queryResourceId: query.id
     });
     console.log(`Link created: ${linkResult.name}`);
 
-    return linkResult; // Return the result of the final link operation
+    return linkResult;
 
   } catch (error) {
-    // Add more context to the error
     console.error('Error during bulk create hunt and query:', error.response?.data || error.message);
-    // Consider cleanup logic here? If query is created but hunt fails, should query be deleted?
-    // For now, just rethrow the error.
     throw new Error(`Bulk create failed: ${error.message}`);
   }
 };

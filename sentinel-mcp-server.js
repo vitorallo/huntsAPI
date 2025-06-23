@@ -14,7 +14,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import http from 'http';
 
-// --- Helper: HTTP request to local Sentinel Integration API ---
+// Helper: HTTP request to local Sentinel Integration API
 function sentinelApiRequest(path, method, body) {
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body || {});
@@ -29,7 +29,6 @@ function sentinelApiRequest(path, method, body) {
       },
     };
     
-    console.error(`Sending ${method} request to ${options.hostname}:${options.port}${options.path}`);
     
     const req = http.request(options, (res) => {
       let chunks = '';
@@ -56,7 +55,7 @@ function sentinelApiRequest(path, method, body) {
   });
 }
 
-// --- MCP Server Setup ---
+// MCP Server Setup
 const server = new Server(
   {
     name: 'Sentinel MCP Server',
@@ -70,7 +69,7 @@ const server = new Server(
   }
 );
 
-// --- Tool Definitions ---
+// Tool Definitions
 const TOOLS = {
   // Tool 1: create_hunt
   create_hunt: {
@@ -89,7 +88,7 @@ const TOOLS = {
   // Tool 2: create_query_with_hunt
   create_query_with_hunt: {
     name: 'create_query_with_hunt',
-    description: 'Create a hunt with ONE only query associated, then link them together. Tactics and techniques must be specified as strings and separate them inside with commas',
+    description: 'Create a hunt with one query associated, then link them together. Tactics and techniques must be specified as strings separated by commas',
     inputSchema: {
       type: 'object',
       properties: {
@@ -141,7 +140,7 @@ const TOOLS = {
   }
 };
 
-// --- Resource Template Definitions ---
+// Resource Template Definitions
 const RESOURCE_TEMPLATES = [
   {
     uriTemplate: 'sentinel://queries/{id}',
@@ -157,31 +156,30 @@ const RESOURCE_TEMPLATES = [
   }
 ];
 
-// --- Register ListTools handler ---
+// Register ListTools handler
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
     tools: Object.values(TOOLS)
   };
 });
 
-// --- Register ListResources handler ---
+// Register ListResources handler
 server.setRequestHandler(ListResourcesRequestSchema, async () => {
   return {
     resources: [] // No static resources for now
   };
 });
 
-// --- Register ListResourceTemplates handler ---
+// Register ListResourceTemplates handler
 server.setRequestHandler(ListResourceTemplatesRequestSchema, async () => {
   return {
     resourceTemplates: RESOURCE_TEMPLATES
   };
 });
 
-// --- Register ReadResource handler ---
+// Register ReadResource handler
 server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   const uri = request.params.uri;
-  console.error(`Resource requested: ${uri}`);
   
   // Parse the URI to determine what resource is being requested
   const queriesMatch = uri.match(/^sentinel:\/\/queries\/(.+)$/);
@@ -231,12 +229,11 @@ server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
   }
 });
 
-// --- Register CallTool handler ---
+// Register CallTool handler
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const toolName = request.params.name;
   const args = request.params.arguments;
   
-  console.error(`Tool called: ${toolName} with args:`, args);
   
   try {
     switch (toolName) {
@@ -331,7 +328,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// --- Start the MCP server (stdio) ---
+// Start the MCP server (stdio)
 console.error('Starting Sentinel MCP Server...');
 try {
   const transport = new StdioServerTransport();

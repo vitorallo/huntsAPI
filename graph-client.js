@@ -21,7 +21,6 @@ const getApplicationInfo = async () => {
   const client = getGraphClient();
   
   try {
-    // Get the application by its client ID
     const filter = `appId eq '${config.azure.clientId}'`;
     const result = await client.api('/applications').filter(filter).get();
     

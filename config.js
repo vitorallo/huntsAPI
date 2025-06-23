@@ -11,8 +11,8 @@ module.exports = {
     workspaceId: process.env.WORKSPACE_ID,
     resourceGroup: process.env.WORKSPACE_RESOURCE_GROUP,
     subscriptionId: process.env.SUBSCRIPTION_ID,
-    APIversion: process.env.API_VERSION || '2022-11-01', // Default if not set in .env
-    previewApiVersion: '2025-01-01-preview' // Specific version for Hunts/Relations
+    APIversion: process.env.API_VERSION || '2022-11-01',
+    previewApiVersion: '2025-01-01-preview'
   },
   scopes: {
     graph: ['https://graph.microsoft.com/.default'],
