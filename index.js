@@ -203,7 +203,7 @@ app.post('/api/hunting-queries/run', async (req, res) => {
       return res.status(400).json({ error: 'Query must be a non-empty string' });
     }
     
-    // Basic KQL syntax validation
+    // Basic KQL syntax validation (written by AI, I don't response for any hallucinations)
     const trimmedQuery = query.trim();
     if (!trimmedQuery.match(/^[a-zA-Z_][a-zA-Z0-9_]*/) && !trimmedQuery.match(/^[a-zA-Z_][a-zA-Z0-9_]*\s*\|/)) {
       return res.status(400).json({ error: 'Query appears to have invalid KQL syntax. Must start with a table name or data source.' });
